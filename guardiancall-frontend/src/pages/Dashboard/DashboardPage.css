@@ -1,0 +1,54 @@
+.dashboard-page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #1A202C;
+}
+
+.dashboard-header {
+  height: 60px;
+  background-color: #2D3748;
+  border-bottom: 1px solid #4A5568;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #E2E8F0;
+  letter-spacing: -0.025em;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #4A5568;
+}
+
+.status-dot.active {
+  background-color: #48BB78;
+  box-shadow: 0 0 0 2px rgba(72, 187, 120, 0.2);
+}
+
+.status-text {
+  font-size: 14px;
+  color: #A0AEC0;
+  font-weight: 500;
+}
+
+.dashboard-content {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
