@@ -1,6 +1,7 @@
 const express = require('express');
 const Alert = require('../models/Alert');
 const { simulateTriangulation } = require('../utils/triangulation');
+const { getAlertStats } = require('../utils/statsCalculator');
 const router = express.Router();
 
 module.exports = (io) => {
@@ -46,6 +47,107 @@ module.exports = (io) => {
             const limit = parseInt(req.query.limit) || 50;
             const alerts = await Alert.find().sort({ timestamp: -1 }).limit(limit);
             res.json(alerts);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+
+    });
+
+    //GET .api/alerts/stats - For heatmaps and analytics
+    router.get('/alerts/stats', async (req, res) => {
+        try {
+            const stats = await getAlertStats(req.query);
+            res.json(stats);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    });
+
+    // GET /api/alerts/:id - Get detailed information for a single alert
+router.get('/alerts/:id', async (req, res) => {
+    try {
+        const alert = await Alert.findById(req.params.id)
+            .populate('assignedRanger') // Get ranger details
+            .populate('relatedAlerts'); // Get related alert details
+        
+        if (!alert) {
+            return res.status(404).json({ error: 'Alert not found' });
+        }
+        
+        res.json(alert);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+    //PAtCH /api/alerts/:id - For rangers to confirm an alert
+    router.patch('/alerts/:id', async (req, res) => {
+        try {
+            const { confirmed } = req.body;
+            const updatedAlert = await Alert.findByIdAndUpdate(
+                req.params.id,
+                { confirmed },
+                { new: true }
+            );
+            if (!updatedAlert) {
+                return res.status(404).json({ error: 'Alert not found' });
+            }
+            res.json(updatedAlert);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    });
+
+    // PATCH /api.alerts/:id/assign - assign a ranger to an alert 
+    router.patch('/alerts/:id/assign', async (req, res) => {
+        try {
+            const { rangerId, notes } = req.body;
+
+            const updatedAlert = await Alert.findByIdAndUpdate(
+                req.params.id,
+                {
+                    assignedRanger: rangerId,
+                    status: 'assigned',
+                    notes: notes || ''
+                },
+                { new: true }
+            ).populate('assignedRanger'); //Get ranger details
+
+            if (!updatedAlert) {
+                return res.status(404).json({ error: 'Alert not found' });
+            }
+
+            res.json(updatedAlert);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    });
+
+    // PATCH .api/alerts/:id/status - Update alert status
+    router.patch('/alerts/:id/status', async (req, res) => {
+        try {
+            const { status, resolutionNotes } = req.body;
+            const validStatuses = ['new', 'assigned', 'investigating', 'resolved', 'false_positive'];
+
+            if (!validStatuses.includes(status)) {
+                return res.status(400).json({ error: 'Invalid status' });
+            }
+
+            const updatedAlert = await Alert.findByIdAndUpdate(
+                req.params.id,
+                {
+                    status,
+                    resolutionNotes: resolutionNotes || '',
+                    resolvedAt: status === 'resolved' || status === 'false_positive' ? new Date() : null
+                },
+                { new: true }
+            );
+
+            if (!updatedAlert) {
+                return res.status(404).json({ error: 'Alert not found '});
+            }
+
+            res.json(updatedAlert);
         } catch (error) {
             res.status(500).json({ error: error.message });
         }

@@ -1,5 +1,3 @@
-const fetch = require('node-fetch');
-
 const API_BASE = 'http://localhost:3000/api';
 
 const simulatedEvent = {
@@ -13,9 +11,10 @@ const simulatedEvent = {
 
 async function simulateShot() {
     try {
-        const response = await fetch(`${PI_BASE}/event`, {
+        const response = await fetch(`${API_BASE}/event`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(simulatedEvent)
         });
         const data = await response.json();
         console.log('Simulation successful:', data);
