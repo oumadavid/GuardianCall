@@ -1,0 +1,13 @@
+.dashboard-page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #1A202C;
+}
+
+
+.dashboard-content {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}

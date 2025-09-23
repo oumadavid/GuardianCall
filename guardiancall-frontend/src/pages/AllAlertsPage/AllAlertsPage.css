@@ -1,0 +1,108 @@
+.all-alerts-page {
+  height: 100vh;
+  background-color: #1A202C;
+  display: flex;
+  flex-direction: column;
+}
+
+.all-alerts-header {
+  height: 70px;
+  background-color: #2D3748;
+  border-bottom: 1px solid #4A5568;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.back-button {
+  background-color: transparent;
+  border: 1px solid #4A5568;
+  color: #E2E8F0;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.back-button:hover {
+  background-color: #4A5568;
+}
+
+.all-alerts-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #E2E8F0;
+  letter-spacing: -0.025em;
+}
+
+.alert-stats {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.total-alerts {
+  font-size: 14px;
+  color: #A0AEC0;
+  background-color: #4A5568;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+.all-alerts-content {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+/* Additional styles for the status badge */
+.alert-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.alert-status {
+  font-size: 11px;
+  color: white;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .all-alerts-header {
+    padding: 0 16px;
+    flex-direction: column;
+    height: auto;
+    padding: 16px;
+    gap: 12px;
+  }
+  
+  .all-alerts-title {
+    font-size: 20px;
+    order: 1;
+  }
+  
+  .back-button {
+    order: 2;
+    align-self: flex-start;
+  }
+  
+  .alert-stats {
+    order: 3;
+    align-self: flex-start;
+  }
+  
+  .all-alerts-content {
+    padding: 16px;
+  }
+}
