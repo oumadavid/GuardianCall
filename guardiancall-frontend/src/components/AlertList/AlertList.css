@@ -204,3 +204,105 @@
 .alert-list-content::-webkit-scrollbar-thumb:hover {
   background: #718096;
 }
+
+/* Loading State */
+.loading-alerts {
+  text-align: center;
+  padding: 40px;
+  color: #718096;
+  font-style: italic;
+}
+
+.alert-count.loading .count-number {
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+/* Error Message */
+.alert-error {
+  background: #fed7d7;
+  color: #c53030;
+  padding: 10px 15px;
+  margin: 10px;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+
+.alert-error button {
+  background: #c53030;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+/* No Alerts State */
+.no-alerts {
+  text-align: center;
+  padding: 40px 20px;
+  color: #718096;
+}
+
+.no-alerts-icon {
+  font-size: 48px;
+  margin-bottom: 10px;
+}
+
+.no-alerts-text {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.no-alerts-subtext {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+/* Refresh Button */
+.refresh-button {
+  background: #f7fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s;
+}
+
+.refresh-button:hover {
+  background: #edf2f7;
+  transform: rotate(90deg);
+}
+
+/* Alert Status Badge */
+.alert-status {
+  margin-top: 5px;
+}
+
+.status-badge {
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+/* Alert List Header Layout */
+.alert-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
