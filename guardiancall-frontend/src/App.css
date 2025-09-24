@@ -13,7 +13,7 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
   background-color: #1A202C;
   color: #E2E8F0;
-  overflow: hidden;
+  overflow: auto;
 }
 
 #root {

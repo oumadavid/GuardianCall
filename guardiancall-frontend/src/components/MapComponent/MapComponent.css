@@ -173,3 +173,271 @@
     align-items: center;
   }
 }
+/* Add to MapComponent.css */
+.route-map-overlay {
+  position: absolute;
+  top: 80px;
+  left: 20px;
+  z-index: 5;
+  background-color: rgba(45, 55, 72, 0.95);
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(74, 85, 104, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.route-highlight h4 {
+  margin: 0 0 8px 0;
+  color: #E2E8F0;
+  font-size: 16px;
+}
+
+.route-stats {
+  display: flex;
+  gap: 16px;
+}
+
+.route-stats span {
+  font-size: 14px;
+  color: #A0AEC0;
+}
+
+.creation-mode-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+  background-color: rgba(45, 55, 72, 0.95);
+  padding: 24px;
+  border-radius: 12px;
+  border: 2px dashed #4299E1;
+  text-align: center;
+  backdrop-filter: blur(10px);
+}
+
+.creation-instructions h4 {
+  margin: 0 0 8px 0;
+  color: #4299E1;
+}
+
+.creation-instructions p {
+  margin: 0 0 12px 0;
+  color: #A0AEC0;
+}
+
+.waypoints-preview {
+  background-color: #48BB78;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.routes-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+/* Add these styles to your existing MapComponent.css */
+
+/* Sensors Map Overlay */
+.sensors-map-overlay {
+  position: absolute;
+  top: 80px;
+  left: 20px;
+  z-index: 5;
+  background-color: rgba(45, 55, 72, 0.95);
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(74, 85, 104, 0.3);
+  backdrop-filter: blur(10px);
+  max-width: 300px;
+}
+
+.sensors-info h4 {
+  margin: 0 0 12px 0;
+  color: #E2E8F0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.sensors-stats-overview {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.sensor-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.stat-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #E2E8F0;
+}
+
+.stat-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stat-label.online {
+  color: #48BB78;
+}
+
+.stat-label.offline {
+  color: #E53E3E;
+}
+
+/* Selected Sensor Info */
+.selected-sensor-info {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(74, 85, 104, 0.5);
+}
+
+.sensor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.sensor-header h5 {
+  margin: 0;
+  color: #E2E8F0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.sensor-status {
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.sensor-status.online {
+  background-color: #48BB78;
+  color: white;
+}
+
+.sensor-status.offline {
+  background-color: #E53E3E;
+  color: white;
+}
+
+.sensor-status.maintenance {
+  background-color: #ED8936;
+  color: white;
+}
+
+.sensor-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sensor-detail {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sensor-detail .label {
+  font-size: 11px;
+  color: #A0AEC0;
+}
+
+.sensor-detail .value {
+  font-size: 11px;
+  font-weight: 600;
+  color: #E2E8F0;
+}
+
+.battery-high { color: #48BB78; }
+.battery-medium { color: #ED8936; }
+.battery-low { color: #E53E3E; }
+
+.alerts {
+  color: #E53E3E;
+  font-weight: 700;
+}
+
+/* Add Sensor Mode */
+.add-sensor-mode-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+  background-color: rgba(45, 55, 72, 0.95);
+  padding: 24px;
+  border-radius: 12px;
+  border: 2px dashed #4299E1;
+  text-align: center;
+  backdrop-filter: blur(10px);
+}
+
+.add-sensor-instructions h4 {
+  margin: 0 0 8px 0;
+  color: #4299E1;
+}
+
+.add-sensor-instructions p {
+  margin: 0 0 12px 0;
+  color: #A0AEC0;
+}
+
+.sensor-type-preview {
+  background-color: #48BB78;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* Sensors Coverage Info */
+.sensors-coverage-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.coverage-value.online {
+  color: #48BB78;
+}
+
+.coverage-value.excellent {
+  color: #48BB78;
+}
+
+.coverage-value.good {
+  color: #ED8936;
+}
+
+.coverage-value.poor {
+  color: #E53E3E;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .sensors-map-overlay {
+    left: 10px;
+    right: 10px;
+    max-width: none;
+  }
+  
+  .sensors-stats-overview {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

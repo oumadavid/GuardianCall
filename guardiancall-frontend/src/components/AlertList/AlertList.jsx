@@ -3,6 +3,7 @@ import './AlertList.css';
 import { useNavigate } from 'react-router-dom';
 
 function AlertList() {
+  const navigate = useNavigate(); 
   const alerts = [
     {
       id: 1,
@@ -62,7 +63,7 @@ function AlertList() {
             </div>
             
             <div className="alert-actions">
-              <button className="action-button primary">Investigate</button>
+              <button className="action-button primary" onClick={() => navigate(`/alerts/${alert.id}`)}>View Details</button>
               <button className="action-button secondary">Dismiss</button>
             </div>
           </div>
