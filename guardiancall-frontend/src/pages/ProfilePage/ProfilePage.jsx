@@ -11,7 +11,7 @@ function ProfilePage() {
     id: 1,
     name: 'Ranger James Kariuki',
     email: 'james.kariuki@guardiancall.org',
-    phone: '+254 712 345 678',
+    phone: '+254 702 683 413',
     role: 'Senior Ranger',
     team: 'Team Alpha',
     badgeNumber: 'RNG-0452',

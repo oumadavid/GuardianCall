@@ -1,8 +1,10 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './AlertDetailsPage.css';
+import SMSModal from '../../components/SmsModal/SmsModal';
 
 function AlertDetailsPage() {
+  const [showSMSModal, setShowSMSModal] = useState(false);
   const { id } = useParams(); // Get the alert ID from the URL
   const navigate = useNavigate();
 
@@ -40,6 +42,13 @@ function AlertDetailsPage() {
       timestamp: '7 min ago',
       severity: 'medium'
     }
+  ];
+
+  // Mock rangers data to pass to the modal
+  const rangersData = [
+    { id: 1, name: 'James Kariuki', phone: '+254702683413', team: 'Alpha' },
+    { id: 2, name: 'Sarah Mwende', phone: '+254723456789', team: 'Bravo' },
+    { id: 3, name: 'Mike Otieno', phone: '+254734567890', team: 'Charlie' }
   ];
 
   const getSeverityColor = (severity) => {
@@ -221,10 +230,25 @@ function AlertDetailsPage() {
         {/* Action Buttons */}
         <div className="action-buttons-row">
           <button className="action-button large secondary">Mark as False Positive</button>
-          <button className="action-button large">Escalate to Authorities</button>
+          <button 
+            className="action-button large"
+            onClick={() => setShowSMSModal(true)}
+            >
+          📱 Send SMS Alert
+          </button>
           <button className="action-button large primary">Resolve Incident</button>
         </div>
       </div>
+
+      {/* SMS Modal - ADD THIS RIGHT HERE */}
+      {showSMSModal && (
+        <SMSModal 
+          alert={alertDetails}
+          isOpen={showSMSModal}
+          onClose={() => setShowSMSModal(false)}
+          rangers={rangersData} // Passing the mock rangers data
+        />
+      )}
     </div>
   );
 }
