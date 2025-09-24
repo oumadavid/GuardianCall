@@ -5,7 +5,9 @@ import AllAlertsPage from './pages/AllAlertsPage/AllAlertsPage';
 import AlertDetailsPage from './pages/AlertDetailsPage/AlertDetailsPage';
 import ProfilePage from './pages/ProfilePage/ProfilePage';
 import Navbar from './components/Navbar/Navbar';
+import RoutesPage from './pages/RoutePage/RoutePage';
 import './App.css';
+import SensorsPage from './pages/SensorsPage/SensorsPage';
 
 
 function App() {
@@ -18,6 +20,8 @@ function App() {
           <Route path="/alerts" element={<AllAlertsPage />} />
           <Route path="/alerts/:id" element={<AlertDetailsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/routes" element={<RoutesPage />} />
+          <Route path="/sensors" element={<SensorsPage />} />
         </Routes>
       </div>
     </Router>

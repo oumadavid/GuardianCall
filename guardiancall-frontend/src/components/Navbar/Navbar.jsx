@@ -30,6 +30,8 @@ function Navbar() {
   const navigationItems = [
     { path: '/', label: 'Dashboard', icon: '📊' },
     { path: '/alerts', label: 'All Alerts', icon: '⚠️' },
+    { path: '/routes', label: 'Routes', icon: '🛣️' },
+    { path: '/sensors', label: 'Sensors', icon: '📡' },
   ];
 
   const isActive = (path) => {
