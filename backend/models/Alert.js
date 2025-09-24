@@ -29,7 +29,7 @@ const alertSchema = new mongoose.Schema({
     notes: String,
     resolutionNotes: String,
     resolvedAt: Date,
-    relatedAt: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Alerts'}]
+    relatedAt: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Alert' }]
 }, { timestamps: true });
 
 alertSchema.index({ location: '2dsphere' });
