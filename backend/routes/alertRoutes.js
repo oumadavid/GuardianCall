@@ -2,6 +2,7 @@ const express = require('express');
 const Alert = require('../models/Alert');
 const { simulateTriangulation } = require('../utils/triangulation');
 const { getAlertStats } = require('../utils/statsCalculator');
+const Ranger = require('../models/Ranger');
 const router = express.Router();
 
 module.exports = (io) => {
@@ -64,21 +65,33 @@ module.exports = (io) => {
     });
 
     // GET /api/alerts/:id - Get detailed information for a single alert
-router.get('/alerts/:id', async (req, res) => {
-    try {
-        const alert = await Alert.findById(req.params.id)
-            .populate('assignedRanger') // Get ranger details
-            .populate('relatedAlerts'); // Get related alert details
-        
-        if (!alert) {
-            return res.status(404).json({ error: 'Alert not found' });
+    router.get('/alerts/:id', async (req, res) => {
+        try {
+            const alert = await Alert.findById(req.params.id)
+                .populate('assignedRanger') // Get ranger details
+                // .populate('relatedAlerts'); // Get related alert details
+            
+            if (!alert) {
+                return res.status(404).json({ error: 'Alert not found' });
+            }
+            
+            res.json(alert);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
         }
-        
-        res.json(alert);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
+    });
+
+    // GET /api/rangers - Get all rangers for assignment dropdown
+    router.get('/rangers', async (req, res) => {
+        try {
+            const rangers = await Ranger.find({ isActive: true })
+                .select('name badgeNumber team phoneNumber currentLocation');
+            res.json(rangers);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    });
+
 
     //PAtCH /api/alerts/:id - For rangers to confirm an alert
     router.patch('/alerts/:id', async (req, res) => {
@@ -108,10 +121,11 @@ router.get('/alerts/:id', async (req, res) => {
                 {
                     assignedRanger: rangerId,
                     status: 'assigned',
-                    notes: notes || ''
+                    notes: notes || '',
+                    updatedAt: new Date()
                 },
                 { new: true }
-            ).populate('assignedRanger'); //Get ranger details
+            ).populate('assignedRanger', 'name badgeNumber team'); //Get ranger details
 
             if (!updatedAlert) {
                 return res.status(404).json({ error: 'Alert not found' });
@@ -119,6 +133,30 @@ router.get('/alerts/:id', async (req, res) => {
 
             res.json(updatedAlert);
         } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    });
+
+    // PATCH /api/alerts/:id/notes - Update alert notes
+    router.patch('/alerts/:id/notes', async (req, res) => {
+        try {
+            const { notes } = req.body;
+
+            const updatedAlert = await Alert.findByIdAndUpdate(
+                req.params.id,
+                {
+                    notes: notes,
+                    updatedAt: new Date()
+                },
+                { new: true }
+            );
+
+            if (!updatedAlert) {
+                return res.status(404).json({ error: 'Alert not found' });
+            }
+
+            res.json(updatedAlert);
+        }catch (error) {
             res.status(500).json({ error: error.message });
         }
     });
@@ -152,6 +190,30 @@ router.get('/alerts/:id', async (req, res) => {
             res.status(500).json({ error: error.message });
         }
     });
+
+    //Utility function to find related alerts 
+    async function findRelatedAlerts(alertId, distanceMeters = 2000, timeWindowMinutes = 30) {
+        const mainAlert = await Alert.findById(alertId);
+        if (!mainAlert) return [];
+
+        const timeWindow = new Date(mainAlert.timestamp.getTime() - timeWindowMinutes * 60 * 1000);
+
+        const relatedAlerts = await Alert.find({
+            _id: { $ne: alertId }, //Exclude the current alert
+            timestamp: { $gte: timeWindow },
+            location: {
+                $near: {
+                    $geometry: {
+                        type: "Point",
+                        coordinates: mainAlert.location.coordinates
+                    },
+                    $maxDistance: distanceMeters
+                }
+            }
+        }).limit(5).sort({ timestamp: -1 }); //Get 5 most recent related alerts
+
+        return relatedAlerts;
+    }
 
     return router;
 }

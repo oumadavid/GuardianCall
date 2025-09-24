@@ -1,68 +1,153 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import apiService from '../../services/api';
+import { 
+    formatCoordinates, 
+    getLocationName, 
+    formatDisplayDate, 
+    formatRelativeTime,
+    getSeverity,
+    getSeverityColor,
+    getStatusColor 
+} from '../../utils/alertDetailsUtils';
 import './AlertDetailsPage.css';
 
 function AlertDetailsPage() {
-  const { id } = useParams(); // Get the alert ID from the URL
+  const { id } = useParams(); 
   const navigate = useNavigate();
+  
+  const [alertDetails, setAlertDetails] = useState(null);
+  const [rangers, setRangers] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [selectedRanger, setSelectedRanger] = useState('');
+  const [newNotes, setNewNotes] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
-  // Mock data - in a real app, you would fetch this based on the ID
-  const alertDetails = {
-    id: 1,
+  // Fetch alert details and related data
+  useEffect(() => {
+    if (id) {
+      fetchAlertData();
+    }
+  }, [id]);
+
+  const fetchAlertData = async () => {
+    try {
+      setIsLoading(true);
+      setError(null)
+
+      //Fetch Alert details
+      const alertData = await apiService.getAlertById(id);
+      setAlertDetails(alertData);
+      setNewNotes(alertData.notes || '');
+
+      //fetch available rangers
+      const rangersData = await apiService.getRangers();
+      setRangers(rangersData);
+
+    } catch (err) {
+      setError('Failed to load alert details: ' + err.message);
+      console.error('Error fetching alert data:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleAssignRanger = async () => {
+    if (!selectedRanger) return;
+    
+    try {
+      setIsSaving(true);
+      const updatedAlert = await apiService.assignRangerToAlert(id, selectedRanger, newNotes);
+      setAlertDetails(updatedAlert);
+      setSelectedRanger('');
+      // Show success message or update UI
+    } catch (err) {
+      setError('Failed to assign ranger: ' + err.message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleSaveNotes = async () => {
+    try {
+      setIsSaving(true);
+      const updatedAlert = await apiService.updateAlertNotes(id, newNotes);
+      setAlertDetails(updatedAlert);
+      // Show success message
+    } catch (err) {
+      setError('Failed to save notes: ' + err.message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleStatusUpdate = async (newStatus) => {
+    try {
+      setIsSaving(true);
+      const resolutionNotes = newStatus === 'false_positive' ? 'Marked as false positive' : '';
+      const updatedAlert = await apiService.updateAlertStatus(id, newStatus, resolutionNotes);
+      setAlertDetails(updatedAlert);
+      // Show success message
+    } catch (err) {
+      setError('Failed to update status: ' + err.message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="alert-details-page">
+        <div className="loading">Loading alert details...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="alert-details-page">
+        <div className="error-message">
+          {error}
+          <button onClick={() => navigate(-1)}>Back to Alerts</button>
+          <button onClick={fetchAlertData}>Retry</button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!alertDetails) {
+    return (
+      <div className="alert-details-page">
+        <div className="error-message">
+          Alert not found
+          <button onClick={() => navigate(-1)}>Back to Alerts</button>
+        </div>
+      </div>
+    );
+  }
+
+  // Transform backend data to frontend format
+  const transformedAlert = {
+    id: alertDetails._id,
     type: 'Gunshot',
-    location: 'Sector 12',
-    timestamp: '2023-08-15T14:32:45Z',
-    relativeTime: '5 minutes ago',
-    severity: 'high',
-    coordinates: { lat: -1.234567, lng: 36.789012 },
-    status: 'new',
-    confidence: 92,
-    sensorId: 'SNR-045',
-    audioSample: 'gunshot_045_20230815_143245.wav',
-    rangerAssigned: 'Not assigned',
-    notes: 'Multiple shots detected in rapid succession. Possible poaching activity.',
-    relatedAlerts: [2, 3]
-  };
-
-  // Mock related alerts data
-  const relatedAlerts = [
-    {
-      id: 2,
-      type: 'Gunshot',
-      location: 'Near River',
-      timestamp: '2 min ago',
-      severity: 'high'
-    },
-    {
-      id: 3,
-      type: 'Gunshot',
-      location: 'North Boundary',
-      timestamp: '7 min ago',
-      severity: 'medium'
-    }
-  ];
-
-  const getSeverityColor = (severity) => {
-    switch (severity) {
-      case 'high': return '#e53e3e';
-      case 'medium': return '#ed8936';
-      case 'low': return '#38a169';
-      default: return '#a0aec0';
-    }
-  };
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'new': return '#e53e3e';
-      case 'investigating': return '#3182ce';
-      case 'resolved': return '#38a169';
-      case 'dismissed': return '#718096';
-      default: return '#a0aec0';
-    }
-  };
-
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleString();
+    location: getLocationName(alertDetails.location?.coordinates),
+    timestamp: alertDetails.timestamp,
+    relativeTime: formatRelativeTime(alertDetails.timestamp),
+    severity: getSeverity(alertDetails.source, alertDetails.confidence),
+    coordinates: alertDetails.location?.coordinates ? {
+      lat: alertDetails.location.coordinates[1],
+      lng: alertDetails.location.coordinates[0]
+    } : { lat: 0, lng: 0 },
+    status: alertDetails.status,
+    confidence: alertDetails.confidence || 0,
+    sensorId: alertDetails.sensorReadings?.[0]?.sensorId || 'Unknown',
+    audioSample: `gunshot_${alertDetails._id}.wav`, // Simulated filename
+    rangerAssigned: alertDetails.assignedRanger ? 
+      `${alertDetails.assignedRanger.name} (${alertDetails.assignedRanger.team})` : 
+      'Not assigned',
+    notes: alertDetails.notes || 'No notes available.',
+    assignedRangerId: alertDetails.assignedRanger?._id
   };
 
   return (
@@ -82,6 +167,13 @@ function AlertDetailsPage() {
         </div>
       </div>
 
+      {error && (
+        <div className="error-banner">
+          {error}
+          <button onClick={() => setError(null)}>×</button>
+        </div>
+      )}
+
       <div className="details-content">
         {/* Main Alert Information */}
         <div className="details-card main-info">
@@ -90,15 +182,15 @@ function AlertDetailsPage() {
             <div className="alert-badges">
               <span 
                 className="severity-badge"
-                style={{ backgroundColor: getSeverityColor(alertDetails.severity) }}
+                style={{ backgroundColor: getSeverityColor(transformedAlert.severity) }}
               >
-                {alertDetails.severity.toUpperCase()}
+                {transformedAlert.severity.toUpperCase()}
               </span>
               <span 
                 className="status-badge"
-                style={{ backgroundColor: getStatusColor(alertDetails.status) }}
+                style={{ backgroundColor: getStatusColor(transformedAlert.status) }}
               >
-                {alertDetails.status.toUpperCase()}
+                {transformedAlert.status.toUpperCase()}
               </span>
             </div>
           </div>
@@ -106,29 +198,37 @@ function AlertDetailsPage() {
           <div className="info-grid">
             <div className="info-item">
               <label>Alert Type</label>
-              <span className="info-value">{alertDetails.type}</span>
+              <span className="info-value">{transformedAlert.type}</span>
             </div>
             <div className="info-item">
               <label>Location</label>
-              <span className="info-value">{alertDetails.location}</span>
+              <span className="info-value">{transformedAlert.location}</span>
             </div>
             <div className="info-item">
               <label>Coordinates</label>
               <span className="info-value coordinates">
-                {alertDetails.coordinates.lat}, {alertDetails.coordinates.lng}
+                {formatCoordinates(alertDetails.location?.coordinates)}
               </span>
             </div>
             <div className="info-item">
               <label>Timestamp</label>
-              <span className="info-value">{formatDate(alertDetails.timestamp)}</span>
+              <span className="info-value">{formatDisplayDate(transformedAlert.timestamp)}</span>
             </div>
             <div className="info-item">
               <label>Detection Confidence</label>
-              <span className="info-value confidence">{alertDetails.confidence}%</span>
+              <span className="info-value confidence">{transformedAlert.confidence}%</span>
             </div>
             <div className="info-item">
               <label>Sensor ID</label>
-              <span className="info-value sensor-id">{alertDetails.sensorId}</span>
+              <span className="info-value sensor-id">{transformedAlert.sensorId}</span>
+            </div>
+            <div className="info-item">
+              <label>Detection Source</label>
+              <span className="info-value">{alertDetails.source || 'single-sensor'}</span>
+            </div>
+            <div className="info-item">
+              <label>Alert ID</label>
+              <span className="info-value alert-id">{transformedAlert.id}</span>
             </div>
           </div>
         </div>
@@ -140,7 +240,7 @@ function AlertDetailsPage() {
           </div>
           <div className="audio-player">
             <div className="audio-info">
-              <span className="audio-filename">{alertDetails.audioSample}</span>
+              <span className="audio-filename">{transformedAlert.audioSample}</span>
               <span className="audio-duration">00:45</span>
             </div>
             <div className="audio-controls">
@@ -149,9 +249,10 @@ function AlertDetailsPage() {
               <button className="audio-button analyze">🔍 Analyze</button>
             </div>
             <div className="audio-waveform">
-              {/* Waveform visualization would go here */}
               <div className="waveform-placeholder">
-                Audio waveform visualization
+                Audio waveform visualization would appear here
+                <br />
+                <small>Confidence: {transformedAlert.confidence}%</small>
               </div>
             </div>
           </div>
@@ -164,14 +265,27 @@ function AlertDetailsPage() {
               <h2>Ranger Assignment</h2>
             </div>
             <div className="assignment-info">
-              <span className="ranger-status">{alertDetails.rangerAssigned}</span>
-              <select className="ranger-select">
+              <span className="ranger-status">{transformedAlert.rangerAssigned}</span>
+              <select 
+                className="ranger-select"
+                value={selectedRanger}
+                onChange={(e) => setSelectedRanger(e.target.value)}
+                disabled={isSaving}
+              >
                 <option value="">Select Ranger...</option>
-                <option value="ranger-1">Ranger James (Team Alpha)</option>
-                <option value="ranger-2">Ranger Sarah (Team Bravo)</option>
-                <option value="ranger-3">Ranger Mike (Team Charlie)</option>
+                {rangers.map(ranger => (
+                  <option key={ranger._id} value={ranger._id}>
+                    {ranger.name} ({ranger.team}) - {ranger.badgeNumber}
+                  </option>
+                ))}
               </select>
-              <button className="assign-button">Assign</button>
+              <button 
+                className="assign-button"
+                onClick={handleAssignRanger}
+                disabled={!selectedRanger || isSaving}
+              >
+                {isSaving ? 'Assigning...' : 'Assign'}
+              </button>
             </div>
           </div>
 
@@ -180,49 +294,45 @@ function AlertDetailsPage() {
               <h2>Notes & Observations</h2>
             </div>
             <div className="notes-content">
-              <p>{alertDetails.notes}</p>
+              <p>{transformedAlert.notes}</p>
               <textarea 
                 className="notes-input"
                 placeholder="Add additional notes or observations..."
+                value={newNotes}
+                onChange={(e) => setNewNotes(e.target.value)}
                 rows="4"
+                disabled={isSaving}
               />
-              <button className="save-notes-button">Save Notes</button>
+              <button 
+                className="save-notes-button"
+                onClick={handleSaveNotes}
+                disabled={isSaving}
+              >
+                {isSaving ? 'Saving...' : 'Save Notes'}
+              </button>
             </div>
           </div>
         </div>
 
-        {/* Related Alerts */}
-        {relatedAlerts.length > 0 && (
-          <div className="details-card">
-            <div className="card-header">
-              <h2>Related Alerts</h2>
-              <span className="related-count">{relatedAlerts.length} related incidents</span>
-            </div>
-            <div className="related-alerts">
-              {relatedAlerts.map(alert => (
-                <div key={alert.id} className="related-alert-item">
-                  <div className="related-alert-info">
-                    <span className="related-type">{alert.type}</span>
-                    <span className="related-location">{alert.location}</span>
-                    <span className="related-time">{alert.timestamp}</span>
-                  </div>
-                  <button 
-                    className="view-related-button"
-                    onClick={() => navigate(`/alerts/${alert.id}`)}
-                  >
-                    View
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* Action Buttons */}
         <div className="action-buttons-row">
-          <button className="action-button large secondary">Mark as False Positive</button>
-          <button className="action-button large">Escalate to Authorities</button>
-          <button className="action-button large primary">Resolve Incident</button>
+          <button 
+            className="action-button large secondary"
+            onClick={() => handleStatusUpdate('false_positive')}
+            disabled={isSaving}
+          >
+            Mark as False Positive
+          </button>
+          <button className="action-button large">
+            Escalate to Authorities
+          </button>
+          <button 
+            className="action-button large primary"
+            onClick={() => handleStatusUpdate('resolved')}
+            disabled={isSaving}
+          >
+            Resolve Incident
+          </button>
         </div>
       </div>
     </div>

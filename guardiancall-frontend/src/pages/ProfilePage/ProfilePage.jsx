@@ -1,46 +1,61 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import apiService from '../../services/api';
 import './ProfilePage.css';
 
 function ProfilePage() {
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [ setError] = useState(null);
 
   // Mock user data - in a real app, this would come from context or API
   const [userData, setUserData] = useState({
-    id: 1,
-    name: 'Ranger James Kariuki',
-    email: 'james.kariuki@guardiancall.org',
-    phone: '+254 712 345 678',
-    role: 'Senior Ranger',
-    team: 'Team Alpha',
-    badgeNumber: 'RNG-0452',
-    station: 'Masai Mara Central Station',
-    joinDate: '2022-03-15',
+    name: '',
+    email: '',
+    phone: '',
+    role: '',
+    team: '',
+    badgeNumber: '',
+    station: '',
+    joinDate: '',
     status: 'active',
     avatar: '👮', // In real app, this would be a URL
-    bio: 'Dedicated wildlife protection specialist with 8 years of experience in anti-poaching operations. Certified in wildlife tracking and emergency response.',
+    bio: '',
     stats: {
-      alertsResponded: 147,
-      successfulInterventions: 89,
-      averageResponseTime: '4.2 min',
-      coverageArea: '250 km²'
+      alertsResponded: 0,
+      successfulInterventions: 0,
+      averageResponseTime: '0 min',
+      coverageArea: '0 km²'
     },
-    certifications: [
-      'Wildlife Protection Advanced',
-      'Emergency First Response',
-      'Advanced Tracking',
-      'Drone Operation'
-    ],
-    recentActivity: [
-      { action: 'Responded to alert', location: 'Sector 12', time: '2 hours ago' },
-      { action: 'Completed patrol', location: 'Northern Route', time: '5 hours ago' },
-      { action: 'Submitted report', location: 'Incident #045', time: '1 day ago' },
-      { action: 'Assigned to alert', location: 'River Crossing', time: '1 day ago' }
-    ]
+    certifications: [],
+    recentActivity: []
   });
 
   const [formData, setFormData] = useState({ ...userData });
+
+  //Fetch user data on component mount
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  const fetchUserData = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      //Fetch profile data from the backend
+      const profileData = await apiService.getProfile();
+      setUserData(profileData);
+      setFormData(profileData);
+
+    } catch (err) {
+      setError('Failed to load profile data:' + err.message);
+      console.error('Error fetching profile:', err);
+    } finally {
+      setIsLoading( false);
+    }
+  };
 
   const handleEditToggle = () => {
     if (isEditing) {
@@ -60,15 +75,37 @@ function ProfilePage() {
     }));
   };
 
-  const handleSave = () => {
-    setUserData(formData);
-    setIsEditing(false);
+  const handleSave = async () => {
+    try {
+      setIsLoading(true);
+
+      //send update to backend
+      const updatedUser = await apiService.updateProfile(formData);
+
+      //Update local state with response from the server
+      setUserData (updatedUser);
+      setIsEditing(false);
+    } catch (err) {
+      setError('Failed to save profile:' + err.message);
+      console.error('Error updating profile:', err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleCancel = () => {
     setFormData({ ...userData });
     setIsEditing(false);
+    setError(null);
   };
+
+  if (isLoading && !userData.name) {
+    return (
+      <div className="profile-page">
+        <div className="loading">Loading profile...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="profile-page">

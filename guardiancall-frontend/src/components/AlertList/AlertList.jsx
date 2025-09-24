@@ -1,6 +1,6 @@
 import React from 'react';
-import './AlertList.css';
 import { useNavigate } from 'react-router-dom';
+import './AlertList.css';
 
 function AlertList() {
   const navigate = useNavigate(); 

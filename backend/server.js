@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const alertRoutes = require('./routes/alertRoutes');
 const rangerRoutes = require('./routes/rangerRoutes');
+const userRoutes = require('./routes/userRoutes');
 const cors = require('cors');
 const http = require('http');
 const socketIo = require('socket.io');
@@ -25,6 +26,7 @@ app.use(cors());
 // API Routes (Pass the io instance to the routes)
 app.use('/api', alertRoutes(io));
 app.use('.api', rangerRoutes);
+app.use('/api', userRoutes);
 
 //Database connection
 mongoose.connect(config.mongodbUri)
