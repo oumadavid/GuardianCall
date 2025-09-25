@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'; 
 import { useParams, useNavigate } from 'react-router-dom';
 import apiService from '../../services/api';
 import { 
@@ -11,8 +11,10 @@ import {
     getStatusColor 
 } from '../../utils/alertDetailsUtils';
 import './AlertDetailsPage.css';
+import SMSModal from '../../components/SmsModal/SmsModal';
 
 function AlertDetailsPage() {
+  const [showSMSModal, setShowSMSModal] = useState(false);
   const { id } = useParams(); 
   const navigate = useNavigate();
   
@@ -67,6 +69,22 @@ function AlertDetailsPage() {
     } finally {
       setIsSaving(false);
     }
+  ];
+
+  // Mock rangers data to pass to the modal
+  const rangersData = [
+    { id: 1, name: 'James Kariuki', phone: '+254702683413', team: 'Alpha' },
+    { id: 2, name: 'Sarah Mwende', phone: '+254723456789', team: 'Bravo' },
+    { id: 3, name: 'Mike Otieno', phone: '+254734567890', team: 'Charlie' }
+  ];
+
+  const getSeverityColor = (severity) => {
+    switch (severity) {
+      case 'high': return '#e53e3e';
+      case 'medium': return '#ed8936';
+      case 'low': return '#38a169';
+      default: return '#a0aec0';
+=======
   };
 
   const handleSaveNotes = async () => {
@@ -316,6 +334,14 @@ function AlertDetailsPage() {
 
         {/* Action Buttons */}
         <div className="action-buttons-row">
+          <button className="action-button large secondary">Mark as False Positive</button>
+          <button 
+            className="action-button large"
+            onClick={() => setShowSMSModal(true)}
+            >
+          📱 Send SMS Alert
+          </button>
+          <button className="action-button large primary">Resolve Incident</button>
           <button 
             className="action-button large secondary"
             onClick={() => handleStatusUpdate('false_positive')}
@@ -333,8 +359,19 @@ function AlertDetailsPage() {
           >
             Resolve Incident
           </button>
+
         </div>
       </div>
+
+      {/* SMS Modal - ADD THIS RIGHT HERE */}
+      {showSMSModal && (
+        <SMSModal 
+          alert={alertDetails}
+          isOpen={showSMSModal}
+          onClose={() => setShowSMSModal(false)}
+          rangers={rangersData} // Passing the mock rangers data
+        />
+      )}
     </div>
   );
 }
