@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const alertRoutes = require('./routes/alertRoutes');
 const rangerRoutes = require('./routes/rangerRoutes');
+const userRoutes = require('./routes/userRoutes');
 const cors = require('cors');
 const http = require('http');
 const socketIo = require('socket.io');
@@ -153,8 +154,9 @@ app.post('/api/send-bulk-sms', async (req, res) => {
 });
 
 // API Routes
-app.use('/api', alertRoutes(io));
-app.use('/api', rangerRoutes);
+app.use('/api', alertRoutes(io)) 
+app.use('.api', rangerRoutes);
+app.use('/api', userRoutes); main
 
 // Database connection
 mongoose.connect(config.mongodbUri)
