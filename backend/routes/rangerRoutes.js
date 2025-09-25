@@ -12,6 +12,17 @@ router.get('/rangers', async (req, res) => {
     }
 });
 
+// GET /api/rangers - Get all rangers
+router.get('/rangers', async (req, res) => {
+    try {
+        const rangers = await Ranger.find({ isActive: true })
+            .select('name badgeNumber team currentLocation');
+        res.json(rangers);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 //POST /api/rangers - Create a new ranger 
 router.post('/rangers', async (req, res) => {
     try {
